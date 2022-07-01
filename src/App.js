@@ -5,6 +5,20 @@ import { TODO_LIST_ABI, TODO_LIST_ADDRESS } from './config'
 import TodoList from './TodoList'
 
 class App extends Component {
+
+  constructor(props) {
+    super(props)
+    this.state = {
+      account: '',
+      taskCount: 0,
+      tasks: [],
+      loading: true
+    }
+
+    this.createTask = this.createTask.bind(this)
+    this.toggleCompleted = this.toggleCompleted.bind(this)
+  }
+
   componentWillMount() {
     this.loadBlockchainData()
   }
@@ -27,18 +41,7 @@ class App extends Component {
     this.setState({ loading: false })
   }
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      account: '',
-      taskCount: 0,
-      tasks: [],
-      loading: true
-    }
-
-    this.createTask = this.createTask.bind(this)
-  }
-
+ 
   createTask(content) {
     this.setState({ loading: true })
     //send method and wait fot this to end and then set loading to false
@@ -47,6 +50,16 @@ class App extends Component {
       this.setState({ loading: false })
     })
   }
+  toggleCompleted(taskId) {
+    this.setState({ loading: true })
+    //send method and wait fot this to end and then set loading to false
+    this.state.todoListContract.methods.toggleCompleted(taskId).send({ from: this.state.account })
+    .once('receipt', (receipt) => {
+      this.setState({ loading: false })
+    })
+  }
+
+ 
 
   render() {
     return (
@@ -66,7 +79,10 @@ class App extends Component {
               //show loading while charging the ToDo List component
               this.state.loading
                 ? <div id="loader" className="text-center"><p className="text-center">Loading...</p></div>
-                : <TodoList tasks={this.state.tasks} createTask={this.createTask} />
+                : <TodoList 
+                tasks={this.state.tasks} 
+                createTask={this.createTask}
+                toggleCompleted = {this.toggleCompleted} />
               }
             </main>
           </div>

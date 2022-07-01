@@ -15,3 +15,6 @@ ul {
   color: grey;
   text-decoration: line-through;
 }
+div#content {
+  margin-top: 50px;
+}
