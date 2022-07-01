@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import Web3 from 'web3'
 import './App.css'
 import { TODO_LIST_ABI, TODO_LIST_ADDRESS } from './config'
+import TodoList from './TodoList'
 
 class App extends Component {
   componentWillMount() {
@@ -22,6 +23,8 @@ class App extends Component {
         tasks: [...this.state.tasks, task]
       })
     }
+    //set loading to false when loadBlockchainData ended
+    this.setState({ loading: false })
   }
 
   constructor(props) {
@@ -29,47 +32,42 @@ class App extends Component {
     this.state = {
       account: '',
       taskCount: 0,
-      tasks: []
+      tasks: [],
+      loading: true
     }
+
+    this.createTask = this.createTask.bind(this)
+  }
+
+  createTask(content) {
+    this.setState({ loading: true })
+    //send method and wait fot this to end and then set loading to false
+    this.state.todoListContract.methods.createTask(content).send({ from: this.state.account })
+    .once('receipt', (receipt) => {
+      this.setState({ loading: false })
+    })
   }
 
   render() {
     return (
       <div>
         <nav className="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
-          <a className="navbar-brand col-sm-3 col-md-2 mr-0" href="http://www.dappuniversity.com/free-download" target="_blank">Dapp University | Todo List</a>
+          <a className="navbar-brand col-sm-3 col-md-2 mr-0" target="_blank">Dapp University Tutorial| Todo List</a>
           <ul className="navbar-nav px-3">
             <li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
               <small><a className="nav-link" href="#"><span id="account"></span></a></small>
             </li>
           </ul>
         </nav>
-        <div className="container-fluid">
+        <div className="container">
           <div className="row">
             <main role="main" className="col-lg-12 d-flex justify-content-center">
-              <div id="loader" className="text-center">
-                <p className="text-center">Loading...</p>
-              </div>
-              <div id="content">
-                <form>
-                  <input id="newTask" type="text" className="form-control" placeholder="Add task..." required />
-                  <input type="submit" hidden="" />
-                </form>
-                <ul id="taskList" className="list-unstyled">
-                  { this.state.tasks.map((task, key) => {
-                    return(
-                      <div className="taskTemplate, checkbox" key={key}>
-                        <label>
-                          <input type="checkbox" />
-                          <span className="content">{task.content}</span>
-                        </label>
-                      </div>
-                    )
-                  })}
-                </ul>
-                <ul id="completedTaskList" className="list-unstyled">
-                </ul>
-              </div>
+              { 
+              //show loading while charging the ToDo List component
+              this.state.loading
+                ? <div id="loader" className="text-center"><p className="text-center">Loading...</p></div>
+                : <TodoList tasks={this.state.tasks} createTask={this.createTask} />
+              }
             </main>
           </div>
         </div>
