@@ -18,7 +18,8 @@ class TodoList extends Component {
           <input type="submit" hidden={true} />
         </form>
         <ul id="taskList" className="list-unstyled">
-          {//this.props - param send it from parent component 
+          {
+          //this.props - param send it from parent component 
           this.props.tasks.map((task, key) => {
             return(
               <div className="taskTemplate, checkbox"  key={key}>
